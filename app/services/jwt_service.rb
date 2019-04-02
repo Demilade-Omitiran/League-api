@@ -7,16 +7,13 @@ class JwtService
 
     def decode(token)
       body = JWT.decode(token, nil, false)
-      HashWithIndifferentAccess.new(body)
-
+      decoded_token = body[0]
     rescue JWT::DecodeError, JWT::VerificationError => e
-      HashWithIndifferentAccess.new(
-        {
+      body = {
           error: true, 
           token: token, 
           message: "this token is invalid"
-        }
-      )
+      }
     end
   end
 end

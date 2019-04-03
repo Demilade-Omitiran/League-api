@@ -1,6 +1,8 @@
 class ApplicationController < ActionController::API
-  def index
-    global_json_render(200, "API works")
+  before_action :authenticate_user_from_headers!
+
+  rescue_from StandardError do |e|
+    global_error_render(500, "Something went wrong.")
   end
 
   protected
@@ -16,11 +18,39 @@ class ApplicationController < ActionController::API
     render json: json_payload, status: status
   end
 
-  def global_error_render(status, message, error)
+  def global_error_render(status, message, error={})
     json_payload = Hash.new
     json_payload[:message] = message
-    json_payload[:errors] = error
+    json_payload[:errors] = error unless error.empty?
 
     render json: json_payload, status: status
+  end
+
+  private
+
+  def authenticate_user_from_headers!
+    return global_error_render(401, "Authorization header not found") unless request.headers && request.headers["HTTP_AUTH_TOKEN"]
+    values = request.headers["HTTP_AUTH_TOKEN"].split(" ")
+    return global_error_render(401, "Format is Authorization: Bearer [token]") unless values.count == 2 && values.first == "Bearer"
+
+    decoded_auth_token = JwtService.decode(values.last)
+    if decoded_auth_token && !decoded_auth_token[:error] && decoded_auth_token["context"] == "user"
+      user = User.find(decoded_auth_token["user_id"])
+
+      if user && user.valid_jwt == values.last
+        @current_user ||= user
+        response.headers['auth_token'] = values.last
+      else
+        global_error_render(401, "Invalid token")
+      end
+    else
+      global_error_render(401, "Invalid token")
+    end
+  end
+
+  def check_admin!
+    unless @current_user.admin
+      global_error_render(401, "Unauthorized.")
+    end
   end
 end

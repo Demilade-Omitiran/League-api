@@ -42,10 +42,6 @@ class UsersController < ApplicationController
     global_json_render(200, "User retrieved successfully", serialized_user(user))
   end
 
-  def user_create_params
-    params.permit(:first_name, :last_name, :email, :password)
-  end
-
   def user_update_params
     params.permit(:first_name, :last_name, :password)
   end

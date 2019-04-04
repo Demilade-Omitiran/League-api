@@ -1,7 +1,7 @@
 class AuthenticationController < ApplicationController
   before_action :authenticate_user_from_headers!, only: [:logout]
   before_action :set_user, only: [:logout]
-  
+
   def register
     user = User.create(user_create_params)
 
@@ -53,5 +53,9 @@ class AuthenticationController < ApplicationController
   private
   def set_user
     @user = current_user
+  end
+
+  def user_create_params
+    params.permit(:first_name, :last_name, :email, :password)
   end
 end

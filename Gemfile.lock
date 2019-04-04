@@ -203,7 +203,7 @@ DEPENDENCIES
   byebug
   database_cleaner
   devise
-  factory_bot_rails (~> 4.0)
+  factory_bot_rails
   faker
   fast_jsonapi
   jwt
@@ -214,7 +214,7 @@ DEPENDENCIES
   rails (~> 5.2.2)
   redis-rails
   rspec-rails (~> 3.5)
-  shoulda-matchers (~> 3.1)
+  shoulda-matchers
   spring
   spring-watcher-listen (~> 2.0.0)
   tzinfo-data

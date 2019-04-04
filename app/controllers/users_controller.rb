@@ -1,55 +1,6 @@
 class UsersController < ApplicationController
-  skip_before_action :authenticate_user_from_headers!, only: [:register, :login]
   before_action :check_admin!, only: [:show, :index]
-  before_action :set_user, except: [:register, :login]
-
-  def register
-    user = User.create(user_create_params)
-
-    if user.save
-      sign_in user, store: false
-
-      token = JwtService.encode({user_id: user.id})
-      user.update_attribute(:valid_jwt, token)
-
-      response_data = { id: user.id, email: user.email, auth_token: token }
-      return global_json_render(200, "Registration successful", response_data)
-    end
-    return global_error_render(400, "Registration unsuccessful", user.errors)
-  end
-
-  def login
-    user = User.find_for_database_authentication(email: params[:email])
-
-    if user && user.valid_for_authentication?{ user.valid_password?(params[:password]) }
-      sign_in user, store: false
-      
-      token = JwtService.encode({user_id: user.id})
-      user.update_attribute(:valid_jwt, token)
-      response.headers['auth_token'] = token
-
-      data = {
-        auth_token: token, 
-        user: { 
-          id: user.id, 
-          email: user.email 
-        }
-      }
-
-      global_json_render(200, "User login successful", data)
-    else
-      message = "Invalid login details"
-
-      global_error_render(401, message)
-    end
-  end
-
-  def logout
-    @user.update_attribute(:valid_jwt, nil)
-    sign_out @user
-
-    global_json_render(200, "Logout successful")
-  end
+  before_action :set_user, except: [:show]
 
   def update
     if @user.update_attributes(user_update_params)

@@ -7,11 +7,15 @@ class ApplicationController < ActionController::API
 
   protected
 
-  def global_json_render(status, message, data = {}, meta = {})
+  def global_json_render(status, message, data = {}, meta = {}, display_data_if_empty = false)
     json_payload = Hash.new
     json_payload[:message] = message
     if (status == 200 || status == 201)
-      json_payload[:data] = data unless data.empty?
+      if data.empty?
+        json_payload[:data] = [] if display_data_if_empty
+      else
+        json_payload[:data] = data
+      end
       json_payload[:meta] = meta unless meta.empty?
     end
 

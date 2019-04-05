@@ -18,7 +18,7 @@ class UsersController < ApplicationController
     users = User.paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
     data = serialized_users(users)
 
-    counter = users.total_entries
+    counter = User.count # total_entries was problematic
     meta = {
       total: counter,
       per_page: params[:per_page].to_i,

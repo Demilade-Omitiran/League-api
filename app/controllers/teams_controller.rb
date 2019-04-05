@@ -3,17 +3,17 @@ class TeamsController < ApplicationController
   before_action :check_admin!, except: [:index, :show]
 
   def index
-    page = params[:page] || 1
-    per_page = params[:per_page] || 20
-    teams = Team.paginate(page: page, per_page: per_page)
+    params[:page] ||= 1
+    params[:per_page] ||= 20
+    teams = Team.paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
     data = serialized_teams(teams)
 
-    counter = teams.total_entries
+    counter = Team.count # total_entries was problematic
     meta = {
       total: counter,
-      per_page: per_page.to_i,
-      page: page.to_i,
-      page_count: counter.zero? ? 1 : (counter / per_page.to_f).ceil
+      per_page: params[:per_page].to_i,
+      page: params[:page].to_i,
+      page_count: counter.zero? ? 1 : (counter / params[:per_page].to_f).ceil
     }
 
     global_json_render(200, "Teams retrieved successfully", data, meta, true)
@@ -37,7 +37,9 @@ class TeamsController < ApplicationController
     team = Team.find_by(id: params[:team_id])
     return global_error_render(404, "Team not found") unless team
 
-    return global_json_render(200, "Team updated successfully", serialized_team(team)) if team.update_attribute(:name, params[:name])
+    return global_error_render(400, "name must be provided") unless params[:name]
+
+    return global_json_render(200, "Team updated successfully", serialized_team(team)) if team.update_attributes(name: params[:name])
     global_error_render(400, "Team could not be updated", team.errors)
   end
 

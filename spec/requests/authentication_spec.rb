@@ -19,6 +19,8 @@ RSpec.describe 'Authentication', type: :request do
       it 'returns the id and email of the user' do
         expect(json['data']).to include("id")
         expect(json['data']['email']).to eq(valid_user_attributes[:email])
+        expect(json['data']['first_name']).to eq(valid_user_attributes[:first_name])
+        expect(json['data']['last_name']).to eq(valid_user_attributes[:last_name])
       end
 
       it 'returns the auth_token' do
@@ -101,5 +103,27 @@ RSpec.describe 'Authentication', type: :request do
     it 'returns a success message' do
       expect(json['message']).to eq('Logout successful')
     end
+  end
+
+  describe "authorization", :authorization do
+    let(:user) { create(:user) }
+    let(:valid_login_params) { { email: user.email, password: user.password } }
+
+    before do
+      post '/login', params: valid_login_params
+      auth_token = json['data']['auth_token']
+      logout_header = { 'HTTP_AUTH_TOKEN' => "Bearer #{auth_token}" }
+
+      get '/users', params: nil, headers: logout_header
+    end
+
+    it 'returns status code 401' do
+      expect(response).to have_http_status(401)
+    end
+
+    it 'returns a success message' do
+      expect(json['message']).to eq('Unauthorized.')
+    end
+
   end
 end

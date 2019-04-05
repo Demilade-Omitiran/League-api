@@ -11,7 +11,7 @@ class AuthenticationController < ApplicationController
       token = JwtService.encode({user_id: user.id})
       user.update_attribute(:valid_jwt, token)
 
-      response_data = { id: user.id, email: user.email, auth_token: token }
+      response_data = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, auth_token: token }
       return global_json_render(201, "Registration successful", response_data)
     end
     return global_error_render(400, "Registration unsuccessful", user.errors)

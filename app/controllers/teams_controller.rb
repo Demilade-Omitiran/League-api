@@ -51,6 +51,40 @@ class TeamsController < ApplicationController
     global_error_render(400, "Team could not be deleted", team.errors)
   end
 
+  def fixtures
+    team = Team.find_by(id: params[:team_id])
+    return global_error_render(404, "Team not found") unless team
+
+    params[:page] ||= 1
+    params[:per_page] ||= 20
+    params[:fixtures] ||= 'all'
+
+    if params[:fixtures] == 'all'
+      fixtures = team.fixtures.paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
+      counter = team.fixtures.count
+    elsif params[:fixtures] == 'home'
+      fixtures = team.home_fixtures.paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
+      counter = team.home_fixtures.count
+    elsif params[:fixtures] == 'away'
+      fixtures = team.away_fixtures.paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
+      counter = team.away_fixtures.count
+    end
+
+    meta = {
+      total: counter,
+      per_page: params[:per_page].to_i,
+      page: params[:page].to_i,
+      page_count: counter.zero? ? 1 : (counter / params[:per_page].to_f).ceil
+    }
+    
+    data = Hash.new
+    data['team'] = serialized_team(team)
+    data['team']['fixtures'] = serialized_fixtures(fixtures)
+    data['team']['meta'] = meta
+
+    global_json_render(200, "Team fixtures retrieved successfully", data, {}, true)
+  end
+
   private
 
   def serialized_team(team)
@@ -62,6 +96,14 @@ class TeamsController < ApplicationController
     data = TeamSerializer.new(teams).serializable_hash
     data = data[:data].map do |team|
       team.dig(:attributes)
+    end
+    data
+  end
+
+  def serialized_fixtures(fixtures)
+    data = FixtureSerializer.new(fixtures).serializable_hash
+    data = data[:data].map do |fixture|
+      fixture.dig(:attributes)
     end
     data
   end

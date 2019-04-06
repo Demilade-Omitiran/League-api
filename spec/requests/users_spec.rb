@@ -82,12 +82,12 @@ RSpec.describe 'Users', type: :request do
 
       it 'returns the list of users' do
         expect(json).not_to be_empty
-        expect(json['data'].size).to eq(11)
+        expect(json['data'].size).to eq(12)
       end
 
       it 'returns meta data' do
         expect(json['meta']).not_to be_empty
-        expect(json['meta']['total']).to eq(11)
+        expect(json['meta']['total']).to eq(12)
         expect(json['meta']['page']).to eq(1)
         expect(json['meta']['per_page']).to eq(20)
         expect(json['meta']['page_count']).to eq(1)
@@ -113,7 +113,7 @@ RSpec.describe 'Users', type: :request do
 
       it 'returns meta data' do
         expect(json['meta']).not_to be_empty
-        expect(json['meta']['total']).to eq(11)
+        expect(json['meta']['total']).to eq(12)
         expect(json['meta']['page']).to eq(2)
         expect(json['meta']['per_page']).to eq(4)
         expect(json['meta']['page_count']).to eq(3)

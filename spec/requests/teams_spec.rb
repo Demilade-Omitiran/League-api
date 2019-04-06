@@ -142,7 +142,7 @@ RSpec.describe 'Teams', type: :request do
       end
 
       it 'returns an array of errors' do
-        expect(json['data']['errors']).not_to be_empty
+        expect(json['errors']).not_to be_empty
       end
     end
   end

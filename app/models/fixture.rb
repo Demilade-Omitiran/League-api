@@ -6,24 +6,34 @@ class Fixture < ApplicationRecord
 
   validates_presence_of :home_team_id, :away_team_id, :match_date
   validate :check_home_and_away_teams
-  validate :check_match_date
-  validate :check_status_before_update, on: :update
+  validate :check_match_date, on: [:update, :create, :save]
 
   PERMITTED_STATUSES = %w[pending completed]
 
   enumerize :status, in: PERMITTED_STATUSES, predicates: true
-  
+
   def check_home_and_away_teams
-    errors.add(:away_team_id, "can't be the same as home_team_id") if home_team_id == away_team_id
+    errors.add(:away_team, "can't be the same as home_team") if home_team_id == away_team_id
   end
 
   def check_match_date
-    errors.add(:match_date, "can't be set for today; set it for a future date") if match_date.today?
-    errors.add(:match_date, "can't be set for past date; set it for a future date") if match_date.to_date.past?
-  end
+    # match_date = match_date + 1.hour #UTC problem
 
-  def check_status_before_update
-    errors.add(:match_date, "can't edit the match_date of a completed fixture") if self.status == "completed"
+    if match_date.past?
+      unless home_team_goals && away_team_goals
+        errors.add(:match_date, "can't set match_date to a past date without both home_team_goals and away_team_goals")
+      else
+        self.status = 'completed'
+      end
+
+      
+    end
+
+    end_of_match = self.match_date + 110.minutes
+
+    if (match_date.future? || (DateTime.now < end_of_match)) && home_team_goals && away_team_goals
+      errors.add(:match_date, "cannot set home_team_goals and away_team_goals for a match set at a future date")
+    end
   end
 
   def self.search(team_name = nil, team_fixtures = nil, status = nil, date_filter = nil, date = nil )
@@ -51,12 +61,13 @@ class Fixture < ApplicationRecord
   private
 
   def self.filter_by_team(team_name, team_fixtures)
-    return left_outer_joins(:home_team).where('teams.name LIKE ?', "#{team_name}%") if team_fixtures == "home"
-    return left_outer_joins(:away_team).where('teams.name LIKE ?', "#{team_name}%") if team_fixtures == "away"
+    team_name = team_name.capitalize
+    return left_outer_joins(:home_team).where('teams.name LIKE ?', "%#{team_name}%") if team_fixtures == "home"
+    return left_outer_joins(:away_team).where('teams.name LIKE ?', "%#{team_name}%") if team_fixtures == "away"
 
     if team_fixtures == nil || team_fixtures == 'all'
-      home_fixtures = left_outer_joins(:home_team).where('teams.name LIKE ?', "#{team_name}%")
-      away_fixtures = left_outer_joins(:away_team).where('teams.name LIKE ?', "#{team_name}%")
+      home_fixtures = left_outer_joins(:home_team).where('teams.name LIKE ?', "%#{team_name}%")
+      away_fixtures = left_outer_joins(:away_team).where('teams.name LIKE ?', "%#{team_name}%")
       
       home_array = home_fixtures.to_a
       away_array = away_fixtures.to_a

@@ -5,7 +5,7 @@ class TeamsController < ApplicationController
   def index
     params[:page] ||= 1
     params[:per_page] ||= 20
-    teams = Team.paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
+    teams = Team.search(params[:query]).paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
     data = serialized_teams(teams)
 
     counter = Team.count # total_entries was problematic
@@ -62,12 +62,15 @@ class TeamsController < ApplicationController
     if params[:fixtures] == 'all'
       fixtures = team.fixtures.paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
       counter = team.fixtures.count
+      message = "All fixtures for #{team.name} retrieved successfully"
     elsif params[:fixtures] == 'home'
       fixtures = team.home_fixtures.paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
       counter = team.home_fixtures.count
+      message = "Home fixtures for #{team.name} retrieved successfully"
     elsif params[:fixtures] == 'away'
       fixtures = team.away_fixtures.paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
       counter = team.away_fixtures.count
+      message = "Away fixtures for #{team.name} retrieved successfully"
     end
 
     meta = {
@@ -82,7 +85,7 @@ class TeamsController < ApplicationController
     data['team']['fixtures'] = serialized_fixtures(fixtures)
     data['team']['meta'] = meta
 
-    global_json_render(200, "Team fixtures retrieved successfully", data, {}, true)
+    global_json_render(200, message, data, {}, true)
   end
 
   private

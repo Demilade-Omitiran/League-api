@@ -5,7 +5,14 @@ class TeamsController < ApplicationController
   def index
     params[:page] ||= 1
     params[:per_page] ||= 20
-    teams = Team.search(params[:query]).paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
+
+    if params[:query]
+      teams = Team.search(params[:query]).paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
+    else
+      teams = Rails.cache.fetch('teams') do
+        Team.paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
+      end
+    end
     data = serialized_teams(teams)
 
     counter = Team.count # total_entries was problematic

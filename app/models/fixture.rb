@@ -12,6 +12,8 @@ class Fixture < ApplicationRecord
 
   enumerize :status, in: PERMITTED_STATUSES, predicates: true
 
+  after_save :create_json_cache
+
   def check_home_and_away_teams
     errors.add(:away_team, "can't be the same as home_team") if home_team_id == away_team_id
   end
@@ -56,7 +58,12 @@ class Fixture < ApplicationRecord
     end
   end
 
-  
+  def self.cache_key(fixtures)
+    {
+      serializer: 'fixtures',
+      stat_record: fixtures.maximum(:updated_at)
+    }
+  end
 
   private
 
@@ -116,5 +123,11 @@ class Fixture < ApplicationRecord
     start_date = dt.beginning_of_day
     end_date = dt.end_of_day
     return start_date, end_date
+  end
+  
+  def create_json_cache
+    fixtures = Rails.cache.fetch('fixtures') do
+      Fixture.paginate(page: params[:page], per_page: params[:per_page])
+    end
   end
 end

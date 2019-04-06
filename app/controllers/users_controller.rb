@@ -15,7 +15,10 @@ class UsersController < ApplicationController
     params[:page] ||= 1
     params[:per_page] ||= 20
 
-    users = User.paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
+    users = Rails.cache.fetch('users') do
+      User.paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
+    end
+ 
     data = serialized_users(users)
 
     counter = User.count # total_entries was problematic

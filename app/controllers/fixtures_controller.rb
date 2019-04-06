@@ -10,7 +10,15 @@ class FixturesController < ApplicationController
       global_error_render(400, "Invalid match_date format") unless valid_date_format
     end
 
-    fixtures = Fixture.search(params[:team_name], params[:team_fixtures], params[:status], date_filter, params[:match_date]).paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
+    if params[:team_name] || params[:team_fixtures] || params[:status] || date_filter || params[:match_date]
+      fixtures = Fixture.search(params[:team_name], params[:team_fixtures], params[:status], date_filter, params[:match_date]).paginate(page: params[:page].to_i, per_page: params[:per_page].to_i)
+    else
+      fixtures = Rails.cache.fetch('fixtures') do
+        Fixture.paginate(page: params[:page], per_page: params[:per_page])
+      end
+    end
+
+    
     data = serialized_fixtures(fixtures)
 
     counter = fixtures.total_entries

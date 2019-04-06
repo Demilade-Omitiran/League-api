@@ -9,4 +9,10 @@ class Team < ApplicationRecord
   def fixtures
     Fixture.where('home_team_id=? OR away_team_id=?', self.id, self.id)
   end
+
+  def self.search(team_name)
+    team_name = team_name.capitalize if team_name
+    return where('name LIKE ?', "%#{team_name}%") if team_name
+    all
+  end 
 end

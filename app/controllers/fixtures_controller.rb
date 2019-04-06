@@ -21,7 +21,7 @@ class FixturesController < ApplicationController
       page_count: counter.zero? ? 1 : (counter / params[:per_page].to_f).ceil
     }
 
-    global_json_render(200, "Teams retrieved successfully", data, meta, true)
+    global_json_render(200, "Fixtures retrieved successfully", data, meta, true)
   end
 
   def show
@@ -65,7 +65,7 @@ class FixturesController < ApplicationController
   private
   
   def fixture_params
-    params.permit(:home_team_id, :away_team_id, :match_date)
+    params.permit(:home_team_id, :away_team_id, :match_date, :home_team_goals, :away_team_goals)
   end
 
   def serialized_fixture(fixture)

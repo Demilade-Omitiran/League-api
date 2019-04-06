@@ -17,5 +17,9 @@ Rails.application.routes.draw do
 
   # Teams
   resources :teams, except: [:edit, :new], param: :team_id
+  get '/teams_fixtures', to: "teams#fixtures"
+
+  # Fixtures
+  resources :fixtures, except: [:edit, :new], param: :fixture_id
 
 end

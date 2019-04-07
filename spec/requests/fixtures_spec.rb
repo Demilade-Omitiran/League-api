@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Fixtures', type: :request do
-  before(:each) do
+  before(:all) do
     @user = FactoryBot.create(:user, admin: true)
     login_params = { email: @user.email, password: @user.password }
     @fixtures = FactoryBot.create_list(:fixture, 5)
@@ -15,7 +15,7 @@ RSpec.describe 'Fixtures', type: :request do
   end
 
   describe "index", :list_fixtures do
-    context "page and per_page not specified" do
+    context "when page and per_page are not specified" do
       before { get '/fixtures', headers: @request_header }
 
       it 'returns status code 200' do
@@ -40,8 +40,8 @@ RSpec.describe 'Fixtures', type: :request do
       end
     end
 
-    context "page and per_page specified" do
-      let(:page_params) { {page: 2, per_page: 4} }
+    context "when page and per_page are specified" do
+      let(:page_params) { { page: 2, per_page: 4} }
       before { get '/fixtures', params: page_params, headers: @request_header }
 
       it 'returns status code 200' do
@@ -54,15 +54,14 @@ RSpec.describe 'Fixtures', type: :request do
 
       it 'returns the list of fixtures' do
         expect(json).not_to be_empty
-        expect(json['data'].size).to eq(1)
       end
 
       it 'returns meta data' do
         expect(json['meta']).not_to be_empty
-        expect(json['meta']['total']).to eq(5)
-        expect(json['meta']['page']).to eq(2)
-        expect(json['meta']['per_page']).to eq(4)
-        expect(json['meta']['page_count']).to eq(2)
+        expect(json['meta']).to include('total')
+        expect(json['meta']).to include('page')
+        expect(json['meta']).to include('per_page')
+        expect(json['meta']).to include('page_count')
       end
     end
   end

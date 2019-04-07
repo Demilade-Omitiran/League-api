@@ -46,6 +46,9 @@ gem 'will_paginate'
 # For debugging
 gem 'pry'
 
+# For seeding and tests
+gem 'faker'
+
 # Enumerated attributes
 gem 'enumerize'
 
@@ -67,7 +70,7 @@ end
 group :test do
   gem 'factory_bot_rails'
   gem 'shoulda-matchers'
-  gem 'faker'
+  # gem 'faker'
   gem 'database_cleaner'
 end
 

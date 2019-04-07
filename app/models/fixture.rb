@@ -127,7 +127,7 @@ class Fixture < ApplicationRecord
   
   def create_json_cache
     fixtures = Rails.cache.fetch('fixtures') do
-      Fixture.paginate(page: params[:page], per_page: params[:per_page])
+      Fixture.paginate(page: 1, per_page: 20)
     end
   end
 end

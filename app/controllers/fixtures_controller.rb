@@ -58,6 +58,11 @@ class FixturesController < ApplicationController
     fixture_already_exists  = Fixture.exists?(home_team_id: params[:home_team_id], away_team_id: params[:away_team_id])
     return global_error_render(400, "Fixture already exists") if fixture_already_exists
 
+    if params[:match_date]
+      valid_date_format, date_filter = fixture_query_valid_match_date_format?(params[:match_date])
+      global_error_render(400, "Invalid match_date format") unless valid_date_format
+    end
+
     return global_json_render(200, "Fixture updated successfully", serialized_fixture(fixture)) if fixture.update_attributes(fixture_params)
     global_error_render(400, "Fixture could not be updated", fixture.errors)
   end

@@ -1,9 +1,9 @@
 class ApplicationController < ActionController::API
   before_action :authenticate_user_from_headers!
 
-  rescue_from StandardError do |e|
-    global_error_render(500, "Something went wrong.")
-  end
+  # rescue_from StandardError do |e|
+  #   global_error_render(500, "Something went wrong.")
+  # end
 
   protected
 

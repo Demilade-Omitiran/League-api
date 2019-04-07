@@ -21,7 +21,7 @@ class FixturesController < ApplicationController
     
     data = serialized_fixtures(fixtures)
 
-    counter = fixtures.total_entries
+    counter = Fixture.search(params[:team_name], params[:team_fixtures], params[:status], date_filter, params[:match_date]).count # fixtures.total_entries was problematic
     meta = {
       total: counter,
       per_page: params[:per_page].to_i,
@@ -60,7 +60,7 @@ class FixturesController < ApplicationController
 
     if params[:match_date]
       valid_date_format, date_filter = fixture_query_valid_match_date_format?(params[:match_date])
-      global_error_render(400, "Invalid match_date format") unless valid_date_format
+      return global_error_render(400, "Invalid match_date format") unless valid_date_format
     end
 
     return global_json_render(200, "Fixture updated successfully", serialized_fixture(fixture)) if fixture.update_attributes(fixture_params)

@@ -39,7 +39,9 @@ class ApplicationController < ActionController::API
 
     decoded_auth_token = JwtService.decode(values.last)
     if decoded_auth_token && !decoded_auth_token[:error] && decoded_auth_token["context"] == "user"
-      user = User.find(decoded_auth_token["user_id"])
+      user = User.find_by(id: decoded_auth_token["user_id"])
+
+      return global_error_render(401, "Invalid token") unless user
 
       if user && user.valid_jwt == values.last
         @current_user ||= user
